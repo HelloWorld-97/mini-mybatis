@@ -1,4 +1,4 @@
-package com.danzz.dynamicProxy;
+package com.danzz.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

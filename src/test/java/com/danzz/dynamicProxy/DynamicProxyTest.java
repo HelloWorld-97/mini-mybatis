@@ -1,5 +1,7 @@
 package com.danzz.dynamicProxy;
 
+import com.danzz.dao.UserQueryDao;
+import com.danzz.entity.User;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;

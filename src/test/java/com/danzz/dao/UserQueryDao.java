@@ -1,4 +1,6 @@
-package com.danzz.dynamicProxy;
+package com.danzz.dao;
+
+import com.danzz.entity.User;
 
 public interface UserQueryDao {
 
