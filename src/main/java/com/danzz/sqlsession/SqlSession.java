@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 public class SqlSession<T> {
 
+    // 手动传method2sql
     private Map<String, String> method2Sql;
 
     private MapperRegistry mapperRegistry;

@@ -1,0 +1,6 @@
+<mapper namespace="com.danzz.dao.UserQueryDao">
+    <select id="queryUserById" parameterType="java.lang.Long" resultType="com.danzz.entity.User">
+        SELECT id,name from t_user
+        where id = 1;
+    </select>
+</mapper>
