@@ -33,12 +33,6 @@ public class XmlConfigurationParser implements ConfigParser {
         this.path = path;
     }
 
-    public static void main(String[] args) {
-        XmlConfigurationParser parser = new XmlConfigurationParser(new SAXReader(), "");
-        Configuration config = parser.parse();
-        System.out.println(config);
-    }
-
     @Override
     public Configuration parse() {
         try {
@@ -51,7 +45,7 @@ public class XmlConfigurationParser implements ConfigParser {
                 mapper.setNamespace(mapperEle.attributeValue("namespace"));
             }
             Iterator<Node> iterator = mapperEle.nodeIterator();
-            ArrayList<SelectStatement> selectStatements = new ArrayList<SelectStatement>;
+            ArrayList<SelectStatement> selectStatements = new ArrayList<SelectStatement>();
             while (iterator.hasNext()) {
                 Node node = iterator.next();
                 if ("select".equals(node.getName())) {
@@ -59,11 +53,13 @@ public class XmlConfigurationParser implements ConfigParser {
                     Element nodeEle = (Element) node;
                     List<Attribute> attributes = nodeEle.attributes();
                     Field[] fields = selectStatement.getClass().getDeclaredFields();
+                    // 增加访问权限
+                    Arrays.stream(fields).forEach(f -> f.setAccessible(true));
                     for (Attribute attribute : attributes) {
                         Optional<Field> first = Arrays.stream(fields)
                                 .filter(f -> f.getName().equalsIgnoreCase(attribute.getName())).findFirst();
                         if (first.isPresent()) {
-                            first.get().set(String.class, attribute.getValue());
+                            first.get().set(selectStatement, attribute.getValue());
                         }
                     }
                     Iterator<Node> sqlNode = nodeEle.nodeIterator();
