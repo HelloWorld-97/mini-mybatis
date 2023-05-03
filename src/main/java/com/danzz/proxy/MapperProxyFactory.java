@@ -1,7 +1,7 @@
 package com.danzz.proxy;
 
+import com.danzz.config.Configuration;
 import java.lang.reflect.Proxy;
-import java.util.Map;
 
 public class MapperProxyFactory<T> {
 
@@ -12,8 +12,8 @@ public class MapperProxyFactory<T> {
         this.proxyInterface = t;
     }
 
-    public T getInstance(Map<String, String> sqlSession) {
-        MapperProxy<T> handler = new MapperProxy<T>(sqlSession, proxyInterface);
+    public T getInstance(Configuration configuration) {
+        MapperProxy<T> handler = new MapperProxy<T>(configuration, proxyInterface);
         return (T) Proxy.newProxyInstance(proxyInterface.getClassLoader(),
                 new Class[]{proxyInterface}, handler);
     }

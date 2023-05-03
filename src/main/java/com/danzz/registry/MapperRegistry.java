@@ -13,6 +13,10 @@ public class MapperRegistry {
     private String basePackagePath;
     private Map<Class<?>, MapperProxyFactory<?>> mapper2MapperProxy;
 
+    public MapperRegistry() {
+        this.mapper2MapperProxy = new HashMap<>();
+    }
+
     public MapperRegistry(String basePackagePath) {
         this.basePackagePath = basePackagePath;
         this.mapper2MapperProxy = new HashMap<>();
@@ -22,7 +26,7 @@ public class MapperRegistry {
         return mapper2MapperProxy.get(mapper);
     }
 
-    private void addMapper(Class<?> t) {
+    public void addMapper(Class<?> t) {
         if (!mapper2MapperProxy.containsKey(t)) {
             mapper2MapperProxy.put(t, new MapperProxyFactory<>(t));
         }

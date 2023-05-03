@@ -1,0 +1,6 @@
+<mapper namespace="com.danzz.dao.UserInsertDao">
+    <select id="saveUser" parameterType="com.danzz.entity.User" resultType="java.lang.Void">
+        insert into t_user
+        values(1,jack);
+    </select>
+</mapper>

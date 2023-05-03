@@ -1,9 +1,11 @@
 package com.danzz.config;
 
-import java.io.File;
+import com.danzz.registry.MapperRegistry;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -24,21 +26,19 @@ import org.dom4j.io.SAXReader;
 @SuperBuilder
 public class XmlConfigurationParser implements ConfigParser {
 
-    private SAXReader reader;
+    private InputStream is;
 
-    private String path;
-
-    public XmlConfigurationParser(SAXReader reader, String path) {
-        this.reader = reader;
-        this.path = path;
+    public XmlConfigurationParser(InputStream is) {
+        this.is = is;
     }
 
     @Override
     public Configuration parse() {
         try {
-            Document document = reader.read(new File(path));
+            SAXReader saxReader = new SAXReader();
+            Document document = saxReader.read(is);
             Element mapperEle = document.getRootElement();
-            Configuration configuration = new Configuration();
+            Configuration configuration = new Configuration(new MapperRegistry());
             Mapper mapper = new Mapper();
             // 解析mapper
             if (StringUtils.isNotBlank(mapperEle.attributeValue("namespace"))) {
@@ -46,6 +46,7 @@ public class XmlConfigurationParser implements ConfigParser {
             }
             Iterator<Node> iterator = mapperEle.nodeIterator();
             ArrayList<SelectStatement> selectStatements = new ArrayList<SelectStatement>();
+            HashMap<String, SelectStatement> method2sql = new HashMap<>();
             while (iterator.hasNext()) {
                 Node node = iterator.next();
                 if ("select".equals(node.getName())) {
@@ -66,13 +67,16 @@ public class XmlConfigurationParser implements ConfigParser {
                     Text sqlText = (Text) sqlNode.next();
                     selectStatement.setSqlStatement(sqlText.getText());
                     selectStatements.add(selectStatement);
+                    method2sql.put(selectStatement.getId(), selectStatement);
                 }
             }
             mapper.setSelectStatements(selectStatements);
+            mapper.setMethod2sql(method2sql);
             configuration.setMapper(mapper);
+            configuration.addMapper(Class.forName(mapper.getNamespace()));
             return configuration;
-        } catch (DocumentException | IllegalAccessException e) {
-            log.error("invalid file path:{}", path);
+        } catch (DocumentException | IllegalAccessException | ClassNotFoundException e) {
+            log.error("parse xml failed:{}", e.getMessage());
             e.printStackTrace();
         }
         return null;
