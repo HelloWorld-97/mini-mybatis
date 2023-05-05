@@ -1,6 +1,10 @@
 package com.danzz.config;
 
+import com.danzz.environment.Environment;
+import com.danzz.environment.Environment.EnvironmentBuilder;
 import com.danzz.registry.MapperRegistry;
+import com.danzz.transaction.TransactionFactory;
+import com.danzz.typealias.TypeAliasRegister;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -37,14 +41,17 @@ public class XmlConfigurationParser implements ConfigParser {
         try {
             SAXReader saxReader = new SAXReader();
             Document document = saxReader.read(is);
-            Element mapperEle = document.getRootElement();
+            Element root = document.getRootElement();
+            //1.parseElement
+            parseEnvironment(root);
+            //2.parseMapper
             Configuration configuration = new Configuration(new MapperRegistry());
             Mapper mapper = new Mapper();
             // 解析mapper
-            if (StringUtils.isNotBlank(mapperEle.attributeValue("namespace"))) {
-                mapper.setNamespace(mapperEle.attributeValue("namespace"));
+            if (StringUtils.isNotBlank(root.attributeValue("namespace"))) {
+                mapper.setNamespace(root.attributeValue("namespace"));
             }
-            Iterator<Node> iterator = mapperEle.nodeIterator();
+            Iterator<Node> iterator = root.nodeIterator();
             ArrayList<SelectStatement> selectStatements = new ArrayList<SelectStatement>();
             HashMap<String, SelectStatement> method2sql = new HashMap<>();
             while (iterator.hasNext()) {
@@ -82,30 +89,25 @@ public class XmlConfigurationParser implements ConfigParser {
         return null;
     }
 
-    // 将xml解析成json，然后再通过json反序列化成对象，不可行应该还是定制化解析
-    public void parseElement(Element element, StringBuilder stringBuilder) {
-        stringBuilder.append("\"");
-        stringBuilder.append(element.getName());
-        stringBuilder.append("\":{");
-        List<Attribute> attributes = element.attributes();
-        for (int i = 0; i < attributes.size(); i++) {
-            stringBuilder.append("\"");
-            stringBuilder.append(attributes.get(i).getName());
-            stringBuilder.append("\":");
-            stringBuilder.append("\"");
-            stringBuilder.append(attributes.get(i).getValue());
-            stringBuilder.append("\",");
-        }
-        Iterator<Node> iterator = element.nodeIterator();
+    public Environment parseEnvironment(Element root) throws InstantiationException, IllegalAccessException {
+        EnvironmentBuilder<?, ?> builder = Environment.builder();
+        String envDefault = root.attributeValue("default");
+        Iterator<Node> iterator = root.nodeIterator();
         while (iterator.hasNext()) {
-            Node node = iterator.next();
-            if (node instanceof Element) {
-                Element eleNode = (Element) node;
-                parseElement(eleNode, stringBuilder);
-            } else if (node instanceof Text) {
-
+            Element env = (Element) iterator.next();
+            if (envDefault.equals(env.attributeValue("id"))) {
+                Iterator<Node> envIterator = env.nodeIterator();
+                while (envIterator.hasNext()) {
+                    Node node = envIterator.next();
+                    if ("transactionManager".equals(node.getName())) {
+                        Element txManagerNode = (Element) node;
+                        TransactionFactory txFactory = (TransactionFactory) TypeAliasRegister.resolveTypeAlias(
+                                txManagerNode.attributeValue("type")).newInstance();
+                        builder.transactionFactory(txFactory);
+                    }
+                    
+                }
             }
         }
-        stringBuilder.append("}");
     }
 }

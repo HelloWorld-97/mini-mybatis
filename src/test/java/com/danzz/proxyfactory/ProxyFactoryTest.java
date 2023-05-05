@@ -40,7 +40,7 @@ public class ProxyFactoryTest {
     @Test
     public void testXmlParser() {
         SqlSessionFactory<UserQueryDao> sqlSessionFactory = new SqlSessionFactory<UserQueryDao>()
-                .fileName("UserQueryDao.xml")
+                .fileName("mapper/UserMapper.xml")
                 .build();
         SqlSession<UserQueryDao> sqlSession = sqlSessionFactory.openSession();
         // 获取mapper并查询
