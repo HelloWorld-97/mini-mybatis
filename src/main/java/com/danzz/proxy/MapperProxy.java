@@ -24,7 +24,8 @@ public class MapperProxy<T> implements InvocationHandler {
         if (Object.class.equals(method.getDeclaringClass())) {
             return method.invoke(args);
         } else {
-            Map<String, SelectStatement> sqlSession = configuration.getMapper().getMethod2sql();
+            Map<String, SelectStatement> sqlSession = configuration.getMapper(method.getDeclaringClass())
+                    .getMethod2sql();
             System.out.printf("%s 被代理了，执行的sql：%s \r\n", method.getName(),
                     sqlSession.get(method.getName()).getSqlStatement());
             return null;

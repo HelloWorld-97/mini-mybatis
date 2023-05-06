@@ -4,11 +4,9 @@ import com.danzz.enums.TransactionIsolation;
 import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
-import lombok.Data;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
-@Data
 public class JDBCTransaction implements Transaction {
 
     private DataSource dataSource;
