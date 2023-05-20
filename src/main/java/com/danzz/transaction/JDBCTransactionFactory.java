@@ -9,11 +9,9 @@ import lombok.Data;
 @Data
 public class JDBCTransactionFactory implements TransactionFactory {
 
-    private DataSource dataSource;
-
     @Override
-    public Transaction newTransaction() {
-        return JDBCTransaction.builder().dataSource(dataSource).build();
+    public Transaction newTransaction(Connection connection) {
+        return new JDBCTransaction(connection);
     }
 
     @Override

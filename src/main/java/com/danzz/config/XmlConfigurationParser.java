@@ -7,6 +7,7 @@ import com.danzz.registry.MapperRegistry;
 import com.danzz.transaction.TransactionFactory;
 import com.danzz.typealias.TypeAliasRegister;
 import java.io.InputStream;
+import java.io.Reader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,23 +27,24 @@ import org.dom4j.Element;
 import org.dom4j.Node;
 import org.dom4j.Text;
 import org.dom4j.io.SAXReader;
+import org.xml.sax.InputSource;
 
 @Slf4j
 @Data
 @SuperBuilder
 public class XmlConfigurationParser implements ConfigParser {
 
-    private InputStream is;
+    private Reader reader;
 
-    public XmlConfigurationParser(InputStream is) {
-        this.is = is;
+    public XmlConfigurationParser(Reader reader) {
+        this.reader = reader;
     }
 
     @Override
     public Configuration parse() {
         try {
             SAXReader saxReader = new SAXReader();
-            Document document = saxReader.read(is);
+            Document document = saxReader.read(new InputSource(this.reader));
             Element root = document.getRootElement();
             Configuration configuration = new Configuration(new MapperRegistry());
             //1.parseElement
@@ -134,32 +136,35 @@ public class XmlConfigurationParser implements ConfigParser {
         String envDefault = root.attributeValue("default");
         Iterator<Node> iterator = root.nodeIterator();
         while (iterator.hasNext()) {
-            Element env = (Element) iterator.next();
-            if (envDefault.equals(env.attributeValue("id"))) {
-                Iterator<Node> envIterator = env.nodeIterator();
-                while (envIterator.hasNext()) {
-                    Node node = envIterator.next();
-                    if ("transactionManager".equals(node.getName())) {
-                        Element txManagerNode = (Element) node;
-                        TransactionFactory txFactory = (TransactionFactory) TypeAliasRegister.resolveTypeAlias(
-                                txManagerNode.attributeValue("type")).newInstance();
-                        builder.transactionFactory(txFactory);
-                    }
-                    if ("datasource".equals(node.getName())) {
-                        Element dataSourceNode = (Element) node;
-                        DataSourceFactory dsFactory = (DataSourceFactory) TypeAliasRegister.resolveTypeAlias(
-                                dataSourceNode.attributeValue("type")).newInstance();
-                        Iterator dsNode = dataSourceNode.nodeIterator();
-                        Properties properties = new Properties();
-                        while (dsNode.hasNext()) {
-                            Node propNode = (Node) dsNode.next();
-                            if ("property".equals(propNode.getName())) {
-                                Element prop = (Element) propNode;
-                                properties.setProperty(prop.attributeValue("name"), prop.attributeValue("value"));
-                            }
+            Node next = iterator.next();
+            if (next instanceof Element){
+                Element env = (Element) next;
+                if (envDefault.equals(env.attributeValue("id"))) {
+                    Iterator<Node> envIterator = env.nodeIterator();
+                    while (envIterator.hasNext()) {
+                        Node node = envIterator.next();
+                        if ("transactionManager".equals(node.getName())) {
+                            Element txManagerNode = (Element) node;
+                            TransactionFactory txFactory = (TransactionFactory) TypeAliasRegister.resolveTypeAlias(
+                                    txManagerNode.attributeValue("type")).newInstance();
+                            builder.transactionFactory(txFactory);
                         }
-                        dsFactory.setProperties(properties);
-                        builder.dataSource(dsFactory.getDataSource());
+                        if ("dataSource".equals(node.getName())) {
+                            Element dataSourceNode = (Element) node;
+                            DataSourceFactory dsFactory = (DataSourceFactory) TypeAliasRegister.resolveTypeAlias(
+                                    dataSourceNode.attributeValue("type")).newInstance();
+                            Iterator dsNode = dataSourceNode.nodeIterator();
+                            Properties properties = new Properties();
+                            while (dsNode.hasNext()) {
+                                Node propNode = (Node) dsNode.next();
+                                if ("property".equals(propNode.getName())) {
+                                    Element prop = (Element) propNode;
+                                    properties.setProperty(prop.attributeValue("name"), prop.attributeValue("value"));
+                                }
+                            }
+                            dsFactory.setProperties(properties);
+                            builder.dataSource(dsFactory.getDataSource());
+                        }
                     }
                 }
             }

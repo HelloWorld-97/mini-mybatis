@@ -3,6 +3,7 @@ package com.danzz.transaction;
 import com.danzz.enums.TransactionIsolation;
 import java.sql.Connection;
 import java.sql.SQLException;
+import javax.sql.ConnectionEvent;
 import javax.sql.DataSource;
 import lombok.experimental.SuperBuilder;
 
@@ -11,6 +12,10 @@ public class JDBCTransaction implements Transaction {
 
     private DataSource dataSource;
     private Connection connection;
+
+    public JDBCTransaction (Connection connection){
+        this.connection = connection;
+    }
 
     @Override
     public Connection getConnection() throws SQLException {
@@ -34,23 +39,26 @@ public class JDBCTransaction implements Transaction {
     public void commit() throws SQLException {
         if (connection != null) {
             connection.commit();
+        }else{
+            throw new SQLException("connection is null");
         }
-        throw new SQLException("connection is null");
     }
 
     @Override
     public void rollback() throws SQLException {
         if (connection != null) {
             connection.rollback();
+        }else {
+            throw new SQLException("connection is null");
         }
-        throw new SQLException("connection is null");
     }
 
     @Override
     public void close(Connection connection) throws SQLException {
         if (connection != null) {
             connection.close();
+        }else {
+            throw new SQLException("connection is null");
         }
-        throw new SQLException("connection is null");
     }
 }

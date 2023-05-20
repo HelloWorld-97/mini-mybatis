@@ -1,10 +1,13 @@
 package com.danzz.proxyfactory;
 
-import com.danzz.dao.UserQueryDao;
+import com.danzz.dao.UserMapper;
+import com.danzz.entity.User;
 import com.danzz.sqlsession.SqlSession;
 import com.danzz.sqlsession.SqlSessionFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
+@Slf4j
 public class ProxyFactoryTest {
 
     // day1 动态代理
@@ -39,12 +42,13 @@ public class ProxyFactoryTest {
     //day03 测试xml解析自动注册功能
     @Test
     public void testXmlParser() {
-        SqlSessionFactory<UserQueryDao> sqlSessionFactory = new SqlSessionFactory<UserQueryDao>()
+        SqlSessionFactory<UserMapper> sqlSessionFactory = new SqlSessionFactory<UserMapper>()
                 .fileName("db-config.xml")
                 .build();
-        SqlSession<UserQueryDao> sqlSession = sqlSessionFactory.openSession();
+        SqlSession<UserMapper> sqlSession = sqlSessionFactory.openSession();
         // 获取mapper并查询
-        UserQueryDao mapper = sqlSession.getMapper(UserQueryDao.class);
-        mapper.queryUserById("1");
+        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+        User user = mapper.queryUserById(1L);
+        log.info("user:{}",user);
     }
 }

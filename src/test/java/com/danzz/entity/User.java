@@ -11,7 +11,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public class User {
 
-    private String id;
+    private Long id;
 
     private String name;
 }

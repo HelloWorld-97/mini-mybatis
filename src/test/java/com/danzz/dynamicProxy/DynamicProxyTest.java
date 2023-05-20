@@ -1,6 +1,6 @@
 package com.danzz.dynamicProxy;
 
-import com.danzz.dao.UserQueryDao;
+import com.danzz.dao.UserMapper;
 import com.danzz.entity.User;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -18,14 +18,14 @@ public class DynamicProxyTest {
                 if (method.getName().equals("queryUserById")) {
                     System.out.println("queryUserById,res:{id:1,name:jack}");
                 }
-                User user = new User("1", "jack");
+                User user = new User(1L, "jack");
                 return user;
             }
         };
-        UserQueryDao userQueryDao = (UserQueryDao) Proxy.newProxyInstance(UserQueryDao.class.getClassLoader(),
-                new Class[]{UserQueryDao.class},
+        UserMapper userMapper = (UserMapper) Proxy.newProxyInstance(UserMapper.class.getClassLoader(),
+                new Class[]{UserMapper.class},
                 handler);
-        User user = userQueryDao.queryUserById("1");
+        User user = userMapper.queryUserById(1L);
         System.out.println(user);
     }
 }

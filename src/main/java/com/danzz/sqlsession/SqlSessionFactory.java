@@ -2,9 +2,16 @@ package com.danzz.sqlsession;
 
 import com.danzz.config.Configuration;
 import com.danzz.config.XmlConfigurationParser;
-import java.io.InputStream;
-import lombok.Data;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+
+import com.danzz.io.Resources;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Data
 public class SqlSessionFactory<T> {
 
@@ -17,9 +24,15 @@ public class SqlSessionFactory<T> {
     }
 
     public SqlSessionFactory build() {
-        InputStream is = this.getClass().getClassLoader().getResourceAsStream(this.fileName);
-        XmlConfigurationParser xmlConfigurationParser = new XmlConfigurationParser(is);
-        this.configuration = xmlConfigurationParser.parse();
+        try {
+            Reader reader = Resources.getResourceAsReader(this.fileName);
+            XmlConfigurationParser xmlConfigurationParser = new XmlConfigurationParser(reader);
+            this.configuration = xmlConfigurationParser.parse();
+            return this;
+        } catch (IOException e) {
+            log.error("read resources failed:{}",this.fileName);
+            e.printStackTrace();
+        }
         return this;
     }
 
