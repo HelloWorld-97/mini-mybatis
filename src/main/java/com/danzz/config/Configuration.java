@@ -1,6 +1,8 @@
 package com.danzz.config;
 
 import com.danzz.datasource.DruidDataSourceFactory;
+import com.danzz.datasource.pooled.PooledDataSourceFactory;
+import com.danzz.datasource.unpooled.UnpooledDataSourceFactory;
 import com.danzz.environment.Environment;
 import com.danzz.registry.MapperRegistry;
 import com.danzz.transaction.JDBCTransactionFactory;
@@ -31,6 +33,8 @@ public class Configuration {
         this.ns2mapper = new HashMap<>();
         TypeAliasRegister.typeAliasRegistry("JDBC", JDBCTransactionFactory.class);
         TypeAliasRegister.typeAliasRegistry("druid", DruidDataSourceFactory.class);
+        TypeAliasRegister.typeAliasRegistry("unpooled", UnpooledDataSourceFactory.class);
+        TypeAliasRegister.typeAliasRegistry("pooled", PooledDataSourceFactory.class);
     }
 
     public void addMapper(Class cls) {

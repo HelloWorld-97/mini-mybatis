@@ -7,14 +7,14 @@
       <option name="url" value="https://mirrors.tencent.com/nexus/repository/maven-public/" />
     </remote-repository>
     <remote-repository>
-      <option name="id" value="tencent_public" />
-      <option name="name" value="tencent_public" />
-      <option name="url" value="https://mirrors.tencent.com/repository/maven/tencent_public/" />
-    </remote-repository>
-    <remote-repository>
       <option name="id" value="central" />
       <option name="name" value="Central Repository" />
       <option name="url" value="https://repo.maven.apache.org/maven2" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="tencent_public" />
+      <option name="name" value="tencent_public" />
+      <option name="url" value="https://mirrors.tencent.com/repository/maven/tencent_public/" />
     </remote-repository>
     <remote-repository>
       <option name="id" value="ascenter" />
