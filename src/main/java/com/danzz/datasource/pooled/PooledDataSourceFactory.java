@@ -3,11 +3,11 @@ package com.danzz.datasource.pooled;
 import com.danzz.datasource.DataSourceFactory;
 import com.danzz.datasource.unpooled.UnpooledDataSource;
 import com.danzz.enums.TransactionIsolation;
-
-import javax.sql.DataSource;
 import java.util.Properties;
+import javax.sql.DataSource;
 
 public class PooledDataSourceFactory implements DataSourceFactory {
+
     private Properties prop;
 
     @Override
@@ -22,8 +22,7 @@ public class PooledDataSourceFactory implements DataSourceFactory {
         unpooledDataSource.setUrl(prop.getProperty("url"));
         unpooledDataSource.setUsername(prop.getProperty("username"));
         unpooledDataSource.setPassword(prop.getProperty("password"));
-        PooledDataSource pooledDataSource = new PooledDataSource();
-        pooledDataSource.setDataSource(unpooledDataSource);
+        PooledDataSource pooledDataSource = new PooledDataSource(unpooledDataSource, new PoolState());
         return pooledDataSource;
     }
 
@@ -36,8 +35,7 @@ public class PooledDataSourceFactory implements DataSourceFactory {
         unpooledDataSource.setPassword(prop.getProperty("password"));
         unpooledDataSource.setAutoCommit(defaultAutoCommit);
         unpooledDataSource.setTransactionIsolation(transactionIsolation.getLevel());
-        PooledDataSource pooledDataSource = new PooledDataSource();
-        pooledDataSource.setDataSource(unpooledDataSource);
+        PooledDataSource pooledDataSource = new PooledDataSource(unpooledDataSource, new PoolState());
         return pooledDataSource;
     }
 }
