@@ -37,14 +37,17 @@ public class PooledDataSource implements DataSource {
         synchronized (state) {
             if (connection.isValid()) {
                 state.getActiveQueue().remove(connection);
+                log.info("ActiveQueue remove:{}", state.getActiveQueue().size());
                 state.setRequestCnt(state.getRequestCnt() + 1);
                 state.setTotalRequestTime(state.getTotalRequestTime() + connection.getRequestTime());
-                if (!state.getIdleQueue().isEmpty() && state.getIdleQueue().size() < maxIdleConnNums) {
+                if (state.getIdleQueue().size() < maxIdleConnNums) {
                     // 如果空闲池还没满，则创建一个放入空闲池，realConn复用
                     PooledConnection newConn = new PooledConnection(this, connection.getRealConn());
                     state.getIdleQueue().add(newConn);
+                    log.info("IdleQueue push size:{}", state.getIdleQueue().size());
                     connection.invalidate();
                 } else {
+                    log.info("销毁连接");
                     connection.getRealConn().close();
                     connection.invalidate();
                 }
@@ -62,6 +65,7 @@ public class PooledDataSource implements DataSource {
 
     public PooledConnection popConnection() throws SQLException {
         PooledConnection conn = null;
+        // 初始idle为空，active上涨，
         synchronized (state) {
             while (conn == null) {
                 //先从空闲池中取
@@ -75,6 +79,8 @@ public class PooledDataSource implements DataSource {
                             conn.getRealConn().rollback();
                         }
                         state.getActiveQueue().add(conn);
+                        log.info("IdleQueue pop size:{},ActiveQueue push size:{}", state.getIdleQueue().size(),
+                                state.getActiveQueue().size());
                     } else {
                         conn.getRealConn().close();
                         conn.invalidate();
@@ -82,12 +88,14 @@ public class PooledDataSource implements DataSource {
                 } else {
                     if (state.getActiveQueue().size() < maxActiveConnNums) {
                         //如果还没达到活跃连接池的最大限制，新建一个连接放入
+                        log.info("创建新连接");
                         conn = new PooledConnection(this, dataSource.getConnection());
                         state.getActiveQueue().add(conn);
                     } else {
                         if (state.getActiveQueue().get(0).getCheckoutTime() > maxCheckoutTime) {
                             // 如果一个连接被占用的时间超过最长占用时间，直接回滚事务
                             PooledConnection oldestConn = state.getActiveQueue().remove(0);
+                            log.info("ActiveQueue remove:{}", state.getActiveQueue().size());
                             if (!oldestConn.getRealConn().getAutoCommit()) {
                                 oldestConn.getRealConn().rollback();
                             }
@@ -98,6 +106,7 @@ public class PooledDataSource implements DataSource {
                             } else {
                                 oldestConn.getRealConn().close();
                                 oldestConn.invalidate();
+                                log.info("创建新连接");
                                 conn = new PooledConnection(this, dataSource.getConnection());
                                 state.getActiveQueue().add(conn);
                             }

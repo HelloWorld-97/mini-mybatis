@@ -50,7 +50,7 @@ public class PooledConnection implements InvocationHandler {
     }
 
     public boolean isValid() throws SQLException {
-        return valid && this.realConn != null && this.realConn.isClosed();
+        return valid && this.realConn != null && !this.realConn.isClosed();
     }
 
     public void invalidate() {
