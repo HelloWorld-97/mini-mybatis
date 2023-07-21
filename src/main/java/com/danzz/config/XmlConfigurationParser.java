@@ -3,19 +3,15 @@ package com.danzz.config;
 import com.danzz.datasource.DataSourceFactory;
 import com.danzz.environment.Environment;
 import com.danzz.environment.Environment.EnvironmentBuilder;
+import com.danzz.mapping.SqlCommandTypeEnum;
 import com.danzz.registry.MapperRegistry;
 import com.danzz.transaction.TransactionFactory;
 import com.danzz.typealias.TypeAliasRegister;
 import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.*;
+
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -98,6 +94,7 @@ public class XmlConfigurationParser implements ConfigParser {
                     selectStatement.setSqlStatement(sqlText.getText());
                     selectStatements.add(selectStatement);
                     method2sql.put(selectStatement.getId(), selectStatement);
+                    selectStatement.setCommandType(SqlCommandTypeEnum.valueOf(node.getName().toUpperCase(Locale.ENGLISH)));
                 }
             }
             mapper.setSelectStatements(selectStatements);

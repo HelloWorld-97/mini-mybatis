@@ -87,14 +87,15 @@ public class ProxyFactoryTest {
         });
         printer.start();
         // 并行执行
-        int times = 100;
+        int times = 2;
         int periodThreadNums = 10;
         CountDownLatch cdl = new CountDownLatch(times * periodThreadNums);
         for (int i = 0; i < times; i++) {
             for (int j = 0; j < periodThreadNums; j++) {
                 tpe.execute(() -> {
                     try {
-                        mapper.queryUserById(1L);
+                        User user = mapper.queryUserById(1L);
+                        log.info("use:{}",user.toString());
                     } catch (Exception e) {
                         e.printStackTrace();
                     } finally {
